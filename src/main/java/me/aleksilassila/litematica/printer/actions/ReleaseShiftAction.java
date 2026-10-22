@@ -1,13 +1,13 @@
 package me.aleksilassila.litematica.printer.actions;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 
 public class ReleaseShiftAction extends Action {
     @Override
-    public void send(MinecraftClient client, ClientPlayerEntity player) {
-        player.input.sneaking = false;
-        player.networkHandler.send(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+    public void send(Minecraft client, LocalPlayer player) {
+        player.input.shiftKeyDown = false;
+        player.connection.send(new ServerboundPlayerCommandPacket(player, ServerboundPlayerCommandPacket.Action.RELEASE_SHIFT_KEY));
     }
 }

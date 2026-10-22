@@ -2,14 +2,14 @@ package me.aleksilassila.litematica.printer.actions;
 
 import fi.dy.masa.litematica.util.InventoryUtils;
 import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 
 public class PrepareAction extends Action {
     public final PrinterPlacementContext context;
@@ -23,7 +23,13 @@ public class PrepareAction extends Action {
         Direction lookDirection = context.lookDirection;
 
         if (lookDirection != null && lookDirection.getAxis().isHorizontal()) {
-            this.yaw = lookDirection.getHorizontal();
+            this.yaw = switch (lookDirection) {
+                case SOUTH -> 0f;
+                case WEST -> 90f;
+                case NORTH -> 180f;
+                case EAST -> -90f;
+                default -> 0f;
+            };
         } else {
             this.modifyYaw = false;
         }
@@ -47,21 +53,21 @@ public class PrepareAction extends Action {
     }
 
     @Override
-    public void send(MinecraftClient client, ClientPlayerEntity player) {
-        ItemStack itemStack = context.getStack();
+    public void send(Minecraft client, LocalPlayer player) {
+        ItemStack itemStack = context.getItemInHand();
         int slot = context.requiredItemSlot;
 
-        if (itemStack != null && client.interactionManager != null) {
-            PlayerInventory inventory = player.getInventory();
+        if (itemStack != null && client.gameMode != null) {
+            Inventory inventory = player.getInventory();
 
             // This thing is straight from MinecraftClient#doItemPick()
-            if (player.getAbilities().creativeMode) {
+            if (player.getAbilities().instabuild) {
                 this.addPickBlock(inventory, itemStack);
-                client.interactionManager.clickCreativeStack(player.getStackInHand(Hand.MAIN_HAND),
-                        36 + inventory.selectedSlot);
+                client.gameMode.handleCreativeModeItemAdd(player.getItemInHand(InteractionHand.MAIN_HAND),
+                        36 + inventory.selected);
             } else if (slot != -1) {
-                if (PlayerInventory.isValidHotbarIndex(slot)) {
-                    inventory.selectedSlot = slot;
+                if (Inventory.isHotbarSlot(slot)) {
+                    inventory.selected = slot;
                 } else {
                     //client.interactionManager.pickFromInventory(slot);
                     InventoryUtils.setPickedItemToHand(slot, itemStack, client);
@@ -70,43 +76,43 @@ public class PrepareAction extends Action {
         }
 
         if (modifyPitch || modifyYaw) {
-            float yaw = modifyYaw ? this.yaw : player.getYaw();
-            float pitch = modifyPitch ? this.pitch : player.getPitch();
+            float yaw = modifyYaw ? this.yaw : player.getYRot();
+            float pitch = modifyPitch ? this.pitch : player.getXRot();
 
-            PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.Full(player.getX(), player.getY(), player.getZ(), yaw,
-                    pitch, player.isOnGround());
+            ServerboundMovePlayerPacket packet = new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), yaw,
+                    pitch, player.onGround());
 
-            player.networkHandler.send(packet);
+            player.connection.send(packet);
         }
 
         if (context.shouldSneak) {
-            player.input.sneaking = true;
-            player.networkHandler.send(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+            player.input.shiftKeyDown = true;
+            player.connection.send(new ServerboundPlayerCommandPacket(player, ServerboundPlayerCommandPacket.Action.PRESS_SHIFT_KEY));
         } else {
-            player.input.sneaking = false;
-            player.networkHandler.send(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            player.input.shiftKeyDown = false;
+            player.connection.send(new ServerboundPlayerCommandPacket(player, ServerboundPlayerCommandPacket.Action.RELEASE_SHIFT_KEY));
         }
     }
 
-    private void addPickBlock(PlayerInventory inv, ItemStack stack) {
-        int slot = inv.getSlotWithStack(stack);
+    private void addPickBlock(Inventory inv, ItemStack stack) {
+        int slot = inv.findSlotMatchingItem(stack);
 
         if (slot >= 0 && slot <= 9) {
-            inv.selectedSlot = slot;
+            inv.selected = slot;
         } else {
             if (slot == -1) {
-                inv.selectedSlot = inv.getSwappableHotbarSlot();
+                inv.selected = inv.getSuitableHotbarSlot();
 
-                if (!inv.main.get(inv.selectedSlot).isEmpty()) {
-                    int empty = inv.getEmptySlot();
+                if (!inv.items.get(inv.selected).isEmpty()) {
+                    int empty = inv.getFreeSlot();
 
                     if (empty != -1) {
-                        inv.main.set(empty, inv.main.get(inv.selectedSlot));
+                        inv.items.set(empty, inv.items.get(inv.selected));
                     }
                 }
-                inv.main.set(inv.selectedSlot, stack);
+                inv.items.set(inv.selected, stack);
             } else {
-                inv.swapSlotWithHotbar(slot);
+                inv.pickSlot(slot);
             }
         }
     }

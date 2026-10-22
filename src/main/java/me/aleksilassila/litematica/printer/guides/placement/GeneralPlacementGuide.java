@@ -3,14 +3,13 @@ package me.aleksilassila.litematica.printer.guides.placement;
 import me.aleksilassila.litematica.printer.Printer;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.block.enums.SlabType;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,8 +41,8 @@ public class GeneralPlacementGuide extends PlacementGuide {
         return false;
     }
 
-    protected Vec3d getHitModifier(Direction validSide) {
-        return new Vec3d(0, 0, 0);
+    protected Vec3 getHitModifier(Direction validSide) {
+        return new Vec3(0, 0, 0);
     }
 
     private Optional<Direction> getValidSide(SchematicBlockState state) {
@@ -68,7 +67,7 @@ public class GeneralPlacementGuide extends PlacementGuide {
                 }
 
                 if (canBeClicked(neighborState.world, neighborState.blockPos) && // Handle unclickable grass for example
-                        !neighborState.currentState.isReplaceable())
+                        !neighborState.currentState.canBeReplaced())
                     validSides.add(side);
             }
         }
@@ -92,34 +91,39 @@ public class GeneralPlacementGuide extends PlacementGuide {
         return isInteractive(state.offset(clickSide).currentState.getBlock());
     }
 
-    private Optional<Vec3d> getHitVector(SchematicBlockState state) {
-        return getValidSide(state).map(side -> Vec3d.ofCenter(state.blockPos)
-                .add(Vec3d.of(side.getVector()).multiply(0.5))
-                .add(getHitModifier(side)));
+    private Vec3 getHitVector(SchematicBlockState state, Direction side) {
+        return Vec3.atCenterOf(state.blockPos)
+                .add(Vec3.atLowerCornerOf(side.getNormal()).scale(0.5))
+                .add(getHitModifier(side));
     }
 
     @Nullable
-    public PrinterPlacementContext getPlacementContext(ClientPlayerEntity player) {
+    public PrinterPlacementContext getPlacementContext(LocalPlayer player) {
         try {
             Optional<Direction> validSide = getValidSide(state);
-            Optional<Vec3d> hitVec = getHitVector(state);
             Optional<ItemStack> requiredItem = getRequiredItem(player);
             int requiredSlot = getRequiredItemStackSlot(player);
 
-            if (validSide.isEmpty() || hitVec.isEmpty() || requiredItem.isEmpty() || requiredSlot == -1)
+            if (validSide.isEmpty() || requiredItem.isEmpty() || requiredSlot == -1)
                 return null;
+
+            Direction side = validSide.get();
+            Vec3 hitVec = getHitVector(state, side);
 
             Optional<Direction> lookDirection = getLookDirection();
             boolean requiresShift = getUseShift(state);
 
-            BlockHitResult blockHitResult = new BlockHitResult(hitVec.get(), validSide.get().getOpposite(),
-                    state.blockPos.offset(validSide.get()), false);
+            BlockHitResult blockHitResult = new BlockHitResult(
+                    hitVec,
+                    side.getOpposite(),
+                    state.blockPos.relative(side),
+                    false
+            );
 
             return new PrinterPlacementContext(player, blockHitResult, requiredItem.get(), requiredSlot,
                     lookDirection.orElse(null), requiresShift);
         } catch (Exception e) {
             Printer.logger.error("getPlacementContext(): Exception caught: {}", e.getMessage());
-            //e.printStackTrace();
             return null;
         }
     }

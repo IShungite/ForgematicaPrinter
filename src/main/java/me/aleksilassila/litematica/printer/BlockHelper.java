@@ -1,9 +1,44 @@
 package me.aleksilassila.litematica.printer;
 
 import net.minecraft.block.*;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.AbstractCandleBlock;
+import net.minecraft.world.level.block.AbstractChestBlock;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
+import net.minecraft.world.level.block.AnvilBlock;
+import net.minecraft.world.level.block.BarrelBlock;
+import net.minecraft.world.level.block.BeaconBlock;
+import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.BellBlock;
+import net.minecraft.world.level.block.BrewingStandBlock;
+import net.minecraft.world.level.block.CakeBlock;
+import net.minecraft.world.level.block.CartographyTableBlock;
+import net.minecraft.world.level.block.CommandBlock;
+import net.minecraft.world.level.block.ComparatorBlock;
+import net.minecraft.world.level.block.CraftingTableBlock;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.DragonEggBlock;
+import net.minecraft.world.level.block.DropperBlock;
+import net.minecraft.world.level.block.EnchantingTableBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.GrindstoneBlock;
+import net.minecraft.world.level.block.HopperBlock;
+import net.minecraft.world.level.block.JukeboxBlock;
+import net.minecraft.world.level.block.LecternBlock;
+import net.minecraft.world.level.block.LeverBlock;
+import net.minecraft.world.level.block.LoomBlock;
+import net.minecraft.world.level.block.NoteBlock;
+import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.RepeaterBlock;
+import net.minecraft.world.level.block.ScaffoldingBlock;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.SignBlock;
+import net.minecraft.world.level.block.SmithingTableBlock;
+import net.minecraft.world.level.block.StonecutterBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +47,7 @@ abstract public class BlockHelper {
     public static List<Class<?>> interactiveBlocks = new ArrayList<>(Arrays.asList(
             AbstractChestBlock.class, AbstractFurnaceBlock.class, CraftingTableBlock.class,
             LeverBlock.class,
-            DoorBlock.class, TrapdoorBlock.class, BedBlock.class, RedstoneWireBlock.class,
+            DoorBlock.class, TrapDoorBlock.class, BedBlock.class, RedStoneWireBlock.class,
             ScaffoldingBlock.class,
             HopperBlock.class, EnchantingTableBlock.class, NoteBlock.class, JukeboxBlock.class,
             CakeBlock.class,
@@ -21,7 +56,7 @@ abstract public class BlockHelper {
             DropperBlock.class, DispenserBlock.class, ShulkerBoxBlock.class, LecternBlock.class,
             FlowerPotBlock.class, BarrelBlock.class, BellBlock.class, SmithingTableBlock.class,
             LoomBlock.class, CartographyTableBlock.class, GrindstoneBlock.class,
-            StonecutterBlock.class, AbstractSignBlock.class, AbstractCandleBlock.class));
+            StonecutterBlock.class, SignBlock.class, AbstractCandleBlock.class));
 
     public static final Item[] SHOVEL_ITEMS = new Item[]{
             Items.NETHERITE_SHOVEL,

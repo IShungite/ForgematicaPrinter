@@ -4,14 +4,15 @@ license = "AGPLv3"
 
 [[mods]]
 modId = "forgematica_printer"
-version = "${version}"
+version = "0.1.0+mc1.21.1"
 displayName = "Forgematica Printer"
 displayURL="https://github.com/ThinkingStudios/Litematica-Forge" #optional
 logoFile="icon.png" #optional
-credits="aleksilassila" #optional
+credits="aleksilassila, KyanOWO1107" #optional
 authors="TexTrue, ThinkingStudio" #optional
 description = '''
 LitematicaPrinter unofficial (Neo)Forge port.
+Build 1.21.1 Neoforge By Kyan.
 '''
 
 [[mixins]]

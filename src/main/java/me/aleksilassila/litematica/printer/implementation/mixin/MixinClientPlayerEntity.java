@@ -6,14 +6,14 @@ import fi.dy.masa.litematica.world.WorldSchematic;
 import me.aleksilassila.litematica.printer.LitematicaMixinMod;
 import me.aleksilassila.litematica.printer.Printer;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,23 +24,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Optional;
 
-@Mixin(ClientPlayerEntity.class)
-public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
+@Mixin(LocalPlayer.class)
+public class MixinClientPlayerEntity extends AbstractClientPlayer {
 
     @Final
     @Shadow
-    protected MinecraftClient client;
+    protected Minecraft client;
     @Final
     @Shadow
-    public ClientPlayNetworkHandler networkHandler;
+    public ClientPacketListener networkHandler;
 
-    public MixinClientPlayerEntity(ClientWorld world, GameProfile profile) {
+    public MixinClientPlayerEntity(ClientLevel world, GameProfile profile) {
         super(world, profile);
     }
 
     @Inject(at = @At("TAIL"), method = "tick")
     public void tick(CallbackInfo ci) {
-        ClientPlayerEntity clientPlayer = (ClientPlayerEntity) (Object) this;
+        LocalPlayer clientPlayer = (LocalPlayer) (Object) this;
 
         if (LitematicaMixinMod.printer == null || LitematicaMixinMod.printer.player != clientPlayer) {
             Printer.printDebug("Initializing printer, player: {}, client: {}", clientPlayer, client);
@@ -61,7 +61,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
     public void openEditSignScreen(SignBlockEntity sign, boolean front, CallbackInfo ci) {
         getTargetSignEntity(sign).ifPresent(signBlockEntity ->
         {
-            UpdateSignC2SPacket packet = new UpdateSignC2SPacket(sign.getPos(),
+            ServerboundSignUpdatePacket packet = new ServerboundSignUpdatePacket(sign.getBlockPos(),
                     front,
                     signBlockEntity.getText(front).getMessage(0, false).getString(),
                     signBlockEntity.getText(front).getMessage(1, false).getString(),
@@ -75,11 +75,11 @@ public class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
     @Unique
     private Optional<SignBlockEntity> getTargetSignEntity(SignBlockEntity sign) {
         WorldSchematic worldSchematic = SchematicWorldHandler.getSchematicWorld();
-        if (sign.getWorld() == null || worldSchematic == null) {
+        if (sign.getLevel() == null || worldSchematic == null) {
             return Optional.empty();
         }
 
-        SchematicBlockState state = new SchematicBlockState(sign.getWorld(), worldSchematic, sign.getPos());
+        SchematicBlockState state = new SchematicBlockState(sign.getLevel(), worldSchematic, sign.getBlockPos());
         BlockEntity targetBlockEntity = worldSchematic.getBlockEntity(state.blockPos);
 
         if (targetBlockEntity instanceof SignBlockEntity targetSignEntity) {

@@ -5,10 +5,15 @@ import me.aleksilassila.litematica.printer.actions.Action;
 import me.aleksilassila.litematica.printer.actions.PrepareAction;
 import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
 import net.minecraft.block.*;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.Direction;
-
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.BannerBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.WallBannerBlock;
+import net.minecraft.world.level.block.WallSignBlock;
+import net.minecraft.world.level.block.WallSkullBlock;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +29,7 @@ public class RotatingBlockGuide extends GeneralPlacementGuide {
     protected List<Direction> getPossibleSides() {
         Block block = state.targetState.getBlock();
         if (block instanceof WallSkullBlock || block instanceof WallSignBlock || block instanceof WallBannerBlock) {
-            Optional<Direction> side = getProperty(state.targetState, Properties.HORIZONTAL_FACING)
+            Optional<Direction> side = getProperty(state.targetState, BlockStateProperties.HORIZONTAL_FACING)
                     .map(Direction::getOpposite);
             return side.map(Collections::singletonList).orElseGet(Collections::emptyList);
         }
@@ -38,14 +43,14 @@ public class RotatingBlockGuide extends GeneralPlacementGuide {
     }
 
     @Override
-    public @Nonnull List<Action> execute(ClientPlayerEntity player) {
+    public @Nonnull List<Action> execute(LocalPlayer player) {
         PrinterPlacementContext ctx = getPlacementContext(player);
 
         if (ctx == null)
             return new ArrayList<>();
 
-        int rotation = getProperty(state.targetState, Properties.ROTATION).orElse(0);
-        if (targetState.getBlock() instanceof BannerBlock || targetState.getBlock() instanceof SignBlock) {
+        int rotation = getProperty(state.targetState, BlockStateProperties.ROTATION_16).orElse(0);
+        if (targetState.getBlock() instanceof BannerBlock || targetState.getBlock() instanceof StandingSignBlock) {
             rotation = (rotation + 8) % 16;
         }
 
