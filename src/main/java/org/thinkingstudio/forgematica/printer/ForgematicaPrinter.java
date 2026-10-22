@@ -9,7 +9,7 @@ import net.neoforged.fml.loading.FMLLoader;
 @Mod(value = PrinterReference.MOD_ID, dist = Dist.CLIENT)
 public class ForgematicaPrinter {
     public ForgematicaPrinter() {
-        if (FMLLoader.getDist().isClient()) {
+        if (FMLLoader.getCurrent().getDist().isClient()) {
             LitematicaMixinMod.onInitialize();
         }
     }

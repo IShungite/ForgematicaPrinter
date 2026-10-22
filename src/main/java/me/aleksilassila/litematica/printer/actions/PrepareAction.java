@@ -5,8 +5,8 @@ import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContex
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -64,10 +64,10 @@ public class PrepareAction extends Action {
             if (player.getAbilities().instabuild) {
                 this.addPickBlock(inventory, itemStack);
                 client.gameMode.handleCreativeModeItemAdd(player.getItemInHand(InteractionHand.MAIN_HAND),
-                        36 + inventory.selected);
+                        36 + inventory.getSelectedSlot());
             } else if (slot != -1) {
                 if (Inventory.isHotbarSlot(slot)) {
-                    inventory.selected = slot;
+                    inventory.setSelectedSlot(slot);
                 } else {
                     //client.interactionManager.pickFromInventory(slot);
                     InventoryUtils.setPickedItemToHand(slot, itemStack, client);
@@ -80,37 +80,32 @@ public class PrepareAction extends Action {
             float pitch = modifyPitch ? this.pitch : player.getXRot();
 
             ServerboundMovePlayerPacket packet = new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), yaw,
-                    pitch, player.onGround());
+                    pitch, player.onGround(), player.horizontalCollision);
 
             player.connection.send(packet);
         }
 
-        if (context.shouldSneak) {
-            player.input.shiftKeyDown = true;
-            player.connection.send(new ServerboundPlayerCommandPacket(player, ServerboundPlayerCommandPacket.Action.PRESS_SHIFT_KEY));
-        } else {
-            player.input.shiftKeyDown = false;
-            player.connection.send(new ServerboundPlayerCommandPacket(player, ServerboundPlayerCommandPacket.Action.RELEASE_SHIFT_KEY));
-        }
+        setSneaking(player, context.shouldSneak);
     }
 
     private void addPickBlock(Inventory inv, ItemStack stack) {
         int slot = inv.findSlotMatchingItem(stack);
 
         if (slot >= 0 && slot <= 9) {
-            inv.selected = slot;
+            inv.setSelectedSlot(slot);
         } else {
             if (slot == -1) {
-                inv.selected = inv.getSuitableHotbarSlot();
+                inv.setSelectedSlot(inv.getSuitableHotbarSlot());
+                NonNullList<ItemStack> items = inv.getNonEquipmentItems();
 
-                if (!inv.items.get(inv.selected).isEmpty()) {
+                if (!items.get(inv.getSelectedSlot()).isEmpty()) {
                     int empty = inv.getFreeSlot();
 
                     if (empty != -1) {
-                        inv.items.set(empty, inv.items.get(inv.selected));
+                        items.set(empty, items.get(inv.getSelectedSlot()));
                     }
                 }
-                inv.items.set(inv.selected, stack);
+                items.set(inv.getSelectedSlot(), stack);
             } else {
                 inv.pickSlot(slot);
             }

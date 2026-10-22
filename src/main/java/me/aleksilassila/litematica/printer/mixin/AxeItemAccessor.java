@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Block;
  */
 @Mixin(AxeItem.class)
 public interface AxeItemAccessor {
-    @Accessor("STRIPPED_BLOCKS")
+    @Accessor("STRIPPABLES")
     static Map<Block, Block> getStrippedBlocks() {
         throw new AssertionError("Untransformed @Accessor");
     }

@@ -1,6 +1,5 @@
 package me.aleksilassila.litematica.printer;
 
-import net.minecraft.block.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.AbstractCandleBlock;

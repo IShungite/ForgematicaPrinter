@@ -29,10 +29,10 @@ public class MixinClientPlayerEntity extends AbstractClientPlayer {
 
     @Final
     @Shadow
-    protected Minecraft client;
+    protected Minecraft minecraft;
     @Final
     @Shadow
-    public ClientPacketListener networkHandler;
+    public ClientPacketListener connection;
 
     public MixinClientPlayerEntity(ClientLevel world, GameProfile profile) {
         super(world, profile);
@@ -43,8 +43,8 @@ public class MixinClientPlayerEntity extends AbstractClientPlayer {
         LocalPlayer clientPlayer = (LocalPlayer) (Object) this;
 
         if (LitematicaMixinMod.printer == null || LitematicaMixinMod.printer.player != clientPlayer) {
-            Printer.printDebug("Initializing printer, player: {}, client: {}", clientPlayer, client);
-            LitematicaMixinMod.printer = new Printer(client, clientPlayer);
+            Printer.printDebug("Initializing printer, player: {}, client: {}", clientPlayer, minecraft);
+            LitematicaMixinMod.printer = new Printer(minecraft, clientPlayer);
         }
 
         // Dirty optimization
@@ -57,7 +57,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayer {
         }
     }
 
-    @Inject(method = "openEditSignScreen", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "openTextEdit", at = @At("HEAD"), cancellable = true)
     public void openEditSignScreen(SignBlockEntity sign, boolean front, CallbackInfo ci) {
         getTargetSignEntity(sign).ifPresent(signBlockEntity ->
         {
@@ -67,7 +67,7 @@ public class MixinClientPlayerEntity extends AbstractClientPlayer {
                     signBlockEntity.getText(front).getMessage(1, false).getString(),
                     signBlockEntity.getText(front).getMessage(2, false).getString(),
                     signBlockEntity.getText(front).getMessage(3, false).getString());
-            this.networkHandler.send(packet);
+            this.connection.send(packet);
             ci.cancel();
         });
     }

@@ -1,18 +1,17 @@
 modLoader = "javafml"
-loaderVersion = "[1,)"
+loaderVersion = "[4,)"
 license = "AGPLv3"
 
 [[mods]]
 modId = "forgematica_printer"
-version = "0.1.0+mc1.21.1"
+version = "${version}"
 displayName = "Forgematica Printer"
-displayURL="https://github.com/ThinkingStudios/Litematica-Forge" #optional
-logoFile="icon.png" #optional
-credits="aleksilassila, KyanOWO1107" #optional
-authors="TexTrue, ThinkingStudio" #optional
+displayURL = "https://github.com/IShungite/ForgematicaPrinter"
+logoFile = "icon.png"
+credits = "aleksilassila, KyanOWO1107, Reime0"
+authors = "TexTrue, ThinkingStudio, IShungite"
 description = '''
-LitematicaPrinter unofficial (Neo)Forge port.
-Build 1.21.1 Neoforge By Kyan.
+LitematicaPrinter unofficial NeoForge port for Forgematica.
 '''
 
 [[mixins]]
@@ -24,27 +23,27 @@ config = "litematica-printer-implementation.mixins.json"
 [[dependencies.forgematica_printer]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21,)"
+versionRange = "[26.1,)"
 ordering = "NONE"
-side = "BOTH"
+side = "CLIENT"
 
 [[dependencies.forgematica_printer]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21,)"
+versionRange = "[26.1.2,26.2)"
 ordering = "NONE"
-side = "BOTH"
+side = "CLIENT"
 
 [[dependencies.forgematica_printer]]
 modId = "mafglib"
 type = "required"
-versionRange = "[*,)"
+versionRange = "[0.5,)"
 ordering = "NONE"
-side = "BOTH"
+side = "CLIENT"
 
 [[dependencies.forgematica_printer]]
 modId = "forgematica"
 type = "required"
-versionRange = "[*,)"
+versionRange = "[0.5,)"
 ordering = "NONE"
-side = "BOTH"
+side = "CLIENT"

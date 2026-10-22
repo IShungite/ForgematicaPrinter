@@ -32,11 +32,11 @@ abstract public class Guide extends BlockHelperImpl {
     protected int getSlotWithItem(LocalPlayer player, ItemStack itemStack) {
         Inventory inventory = player.getInventory();
 
-        for (int i = 0; i < inventory.items.size(); ++i) {
-            if (itemStack.isEmpty() && inventory.items.get(i).is(itemStack.getItem())) {
+        for (int i = 0; i < inventory.getNonEquipmentItems().size(); ++i) {
+            if (itemStack.isEmpty() && inventory.getNonEquipmentItems().get(i).is(itemStack.getItem())) {
                 return i;
             }
-            if (!inventory.items.get(i).isEmpty() && ItemStack.isSameItem(inventory.items.get(i), itemStack)) {
+            if (!inventory.getNonEquipmentItems().get(i).isEmpty() && ItemStack.isSameItem(inventory.getNonEquipmentItems().get(i), itemStack)) {
                 return i;
             }
         }
@@ -46,7 +46,7 @@ abstract public class Guide extends BlockHelperImpl {
 
     protected int getRequiredItemStackSlot(LocalPlayer player) {
         if (player.getAbilities().instabuild) {
-            return player.getInventory().selected;
+            return player.getInventory().getSelectedSlot();
         }
 
         Optional<ItemStack> requiredItem = getRequiredItem(player);

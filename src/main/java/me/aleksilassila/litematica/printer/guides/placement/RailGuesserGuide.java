@@ -117,7 +117,7 @@ public class RailGuesserGuide extends GuesserGuide {
     private List<Direction> getRailDirections(RailShape railShape) {
         String name = railShape.getName();
 
-        if (railShape.isAscending()) {
+        if (railShape.isSlope()) {
             Direction d = Direction.valueOf(name.replace("ascending_", "").toUpperCase());
             return Arrays.asList(d, d.getOpposite());
         } else {

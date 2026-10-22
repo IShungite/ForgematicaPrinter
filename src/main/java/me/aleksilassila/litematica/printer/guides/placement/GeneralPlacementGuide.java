@@ -93,7 +93,7 @@ public class GeneralPlacementGuide extends PlacementGuide {
 
     private Vec3 getHitVector(SchematicBlockState state, Direction side) {
         return Vec3.atCenterOf(state.blockPos)
-                .add(Vec3.atLowerCornerOf(side.getNormal()).scale(0.5))
+                .add(Vec3.atLowerCornerOf(side.getUnitVec3i()).scale(0.5))
                 .add(getHitModifier(side));
     }
 
