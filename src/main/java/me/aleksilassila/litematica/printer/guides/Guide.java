@@ -4,7 +4,7 @@ import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.actions.Action;
 import me.aleksilassila.litematica.printer.implementation.BlockHelperImpl;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.CoralPlantBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,13 +30,13 @@ abstract public class Guide extends BlockHelperImpl {
     }
 
     protected int getSlotWithItem(LocalPlayer player, ItemStack itemStack) {
-        Inventory inventory = player.getInventory();
+        NonNullList<ItemStack> items = player.getInventory().getNonEquipmentItems();
 
-        for (int i = 0; i < inventory.getNonEquipmentItems().size(); ++i) {
-            if (itemStack.isEmpty() && inventory.getNonEquipmentItems().get(i).is(itemStack.getItem())) {
+        for (int i = 0; i < items.size(); ++i) {
+            if (itemStack.isEmpty() && items.get(i).is(itemStack.getItem())) {
                 return i;
             }
-            if (!inventory.getNonEquipmentItems().get(i).isEmpty() && ItemStack.isSameItem(inventory.getNonEquipmentItems().get(i), itemStack)) {
+            if (!items.get(i).isEmpty() && ItemStack.isSameItem(items.get(i), itemStack)) {
                 return i;
             }
         }

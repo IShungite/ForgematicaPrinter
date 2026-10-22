@@ -11,14 +11,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SlabGuide extends GeneralPlacementGuide {
+    private final SlabType targetType;
+
     public SlabGuide(SchematicBlockState state) {
         super(state);
+        this.targetType = getProperty(state.targetState, SlabBlock.TYPE).orElse(SlabType.DOUBLE);
     }
 
     @Override
     public boolean canExecute(LocalPlayer player) {
         // A single slab of the wrong half can't be fixed by placing: another slab would only turn it into a double slab.
-        SlabType targetType = getProperty(state.targetState, SlabBlock.TYPE).orElse(SlabType.DOUBLE);
         SlabType currentType = getProperty(state.currentState, SlabBlock.TYPE).orElse(null);
         if (targetType != SlabType.DOUBLE && currentType != null && currentType != SlabType.DOUBLE) {
             return false;
@@ -32,8 +34,11 @@ public class SlabGuide extends GeneralPlacementGuide {
         List<Direction> resultList = new ArrayList<>();
         // Clicking the top face of the block below always places a bottom slab and the
         // bottom face of the block above always a top slab, whatever the hit position.
-        SlabType targetType = getProperty(state.targetState, SlabBlock.TYPE).orElse(SlabType.DOUBLE);
-        Direction wrongSide = targetType == SlabType.TOP ? Direction.DOWN : targetType == SlabType.BOTTOM ? Direction.UP : null;
+        Direction wrongSide = switch (targetType) {
+            case TOP -> Direction.DOWN;
+            case BOTTOM -> Direction.UP;
+            case DOUBLE -> null;
+        };
 
         Direction[] horizontalDirections = {
                 Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST

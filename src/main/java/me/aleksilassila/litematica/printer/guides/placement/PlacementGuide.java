@@ -4,7 +4,6 @@ import fi.dy.masa.litematica.util.ItemUtils;
 import me.aleksilassila.litematica.printer.SchematicBlockState;
 import me.aleksilassila.litematica.printer.actions.Action;
 import me.aleksilassila.litematica.printer.actions.PrepareAction;
-import me.aleksilassila.litematica.printer.actions.ReleaseShiftAction;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.guides.Guide;
 import me.aleksilassila.litematica.printer.implementation.PrinterPlacementContext;
@@ -106,7 +105,6 @@ abstract public class PlacementGuide extends Guide {
         if (ctx == null) return actions;
         actions.add(new PrepareAction(ctx));
         actions.add(new InteractActionImpl(ctx));
-        if (ctx.shouldSneak) actions.add(new ReleaseShiftAction());
 
         return actions;
     }

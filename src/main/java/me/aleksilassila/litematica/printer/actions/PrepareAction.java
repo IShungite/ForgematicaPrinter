@@ -84,8 +84,6 @@ public class PrepareAction extends Action {
 
             player.connection.send(packet);
         }
-
-        setSneaking(player, context.shouldSneak);
     }
 
     private void addPickBlock(Inventory inv, ItemStack stack) {
@@ -95,17 +93,18 @@ public class PrepareAction extends Action {
             inv.setSelectedSlot(slot);
         } else {
             if (slot == -1) {
-                inv.setSelectedSlot(inv.getSuitableHotbarSlot());
+                int selected = inv.getSuitableHotbarSlot();
+                inv.setSelectedSlot(selected);
                 NonNullList<ItemStack> items = inv.getNonEquipmentItems();
 
-                if (!items.get(inv.getSelectedSlot()).isEmpty()) {
+                if (!items.get(selected).isEmpty()) {
                     int empty = inv.getFreeSlot();
 
                     if (empty != -1) {
-                        items.set(empty, items.get(inv.getSelectedSlot()));
+                        items.set(empty, items.get(selected));
                     }
                 }
-                items.set(inv.getSelectedSlot(), stack);
+                items.set(selected, stack);
             } else {
                 inv.pickSlot(slot);
             }
