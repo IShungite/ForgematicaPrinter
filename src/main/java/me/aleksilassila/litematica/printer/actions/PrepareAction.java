@@ -91,7 +91,7 @@ public class PrepareAction extends Action {
     private void addPickBlock(Inventory inv, ItemStack stack) {
         int slot = inv.findSlotMatchingItem(stack);
 
-        if (slot >= 0 && slot <= 9) {
+        if (Inventory.isHotbarSlot(slot)) {
             inv.setSelectedSlot(slot);
         } else {
             if (slot == -1) {
